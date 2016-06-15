@@ -82,13 +82,16 @@ class HttpService():
     def fetch_content(self, url, headers=None):
         return self.http_request(url, headers=headers).read()
 
-    def fetch_document(self, url, headers=None):
+    def fetch_document(self, url, headers=None, encoding=None):
         content = self.fetch_content(url, headers=headers)
 
-        return self.to_document(content)
+        return self.to_document(content, encoding=encoding)
 
-    def to_document(self, buffer):
-        return html.fromstring(buffer)
+    def to_document(self, buffer, encoding=None):
+        if encoding:
+            return html.fromstring(buffer.decode(encoding))
+        else:
+            return html.fromstring(buffer)
 
     def to_json(self, buffer):
         if not buffer:

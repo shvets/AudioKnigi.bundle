@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
 import history
 import pagination
 import common_routes
@@ -11,7 +10,7 @@ from flow_builder import FlowBuilder
 def HandleBooks(title, page=1):
     oc = ObjectContainer(title2=unicode(L(title)))
 
-    response = service.get_audiobooks()
+    response = service.get_audiobooks(page=page)
 
     for item in response['books']:
         name = item['name']
@@ -19,10 +18,10 @@ def HandleBooks(title, page=1):
 
         oc.add(DirectoryObject(
             key=Callback(HandleBook, path=path, name=name),
-            title=unicode(name, 'utf-8')
+            title=unicode(name)
         ))
 
-    pagination.append_controls(oc, response['pagination'], callback=HandleBooks, title=title, page=page)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, title=title)
 
     return oc
 

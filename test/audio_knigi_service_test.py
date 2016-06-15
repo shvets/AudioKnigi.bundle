@@ -14,8 +14,6 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def test_get_audiobooks(self):
         result = self.service.get_audiobooks()
 
-        #for i in xrange(0, len(s)): print i, s[i], ord(s[i])
-
         print(json.dumps(result, indent=4))
 
     def test_pagination(self):

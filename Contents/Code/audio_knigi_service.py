@@ -21,7 +21,7 @@ class AudioKnigiService(HttpService):
 
         page_path = self.get_page_path('/', page)
 
-        document = self.fetch_document(self.URL)
+        document = self.fetch_document(self.URL + page_path, encoding='utf-8')
 
         items = document.xpath('//article')
 
