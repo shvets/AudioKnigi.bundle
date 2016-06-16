@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-PREFIX = '/video/audio_knigi'
+PREFIX = '/video/audioknigi'
 
 ART = 'art-default.jpg'
 ICON = 'icon-default.png'
