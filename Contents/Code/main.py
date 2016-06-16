@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import urllib
+
 import history
 import pagination
 import common_routes
@@ -18,8 +20,17 @@ def HandleNewBooks(title, page=1):
         thumb = item['thumb']
         description = item['description']
 
+        new_params = {
+            'type': 'tracks',
+            'id': id,
+            'name': name,
+            'thumb': thumb,
+            # 'artist': author,
+            'content': description,
+            # 'rating': rating
+        }
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            key=Callback(HandleTracks, **new_params),
             title=unicode(name),
             thumb=thumb
         ))
@@ -124,19 +135,19 @@ def HandleTracks(operation=None, container=False, **params):
 
     oc = ObjectContainer(title2=unicode(L(params['name'])))
 
-    response = service.get_audiobook(params['id'])
+    response = service.get_audio_tracks(params['id'])
 
-    for item in response:
-        name = item['title']
+    for index, item in enumerate(response):
+        #name = "Part " + str(index+1)
+        name = str(item['title'])
         path = str(item['mp3'])
+
         format = 'mp3'
         bitrate = 0
-        duration = 10
-        thumb = params['thumb']
+        duration = 100000
+        thumb = str(params['thumb'])
         artist = params['name']
 
-        Log(path)
-        Log(type(path))
         new_params = {
             'type': 'track',
             'id': path,
@@ -162,7 +173,7 @@ def HandleTrack(container=False, **params):
 
     url = media_info['id']
 
-    Log(url)
+    url = urllib.unquote_plus(url)
 
     if 'm4a' in media_info['format']:
         format = 'm4a'
@@ -190,8 +201,6 @@ def HandleTrack(container=False, **params):
 
     if 'artist' in media_info:
         metadata_object.artist = media_info['artist']
-
-    Log(url)
 
     media_object = FlowBuilder.build_media_object(Callback(common_routes.PlayAudio, url=url), metadata)
 

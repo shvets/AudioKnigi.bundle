@@ -157,7 +157,7 @@ class AudioKnigiService(HttpService):
             "has_next": page < pages,
         }
 
-    def get_audiobook(self, url):
+    def get_audio_tracks(self, url):
         book_id = None
 
         document = self.fetch_document(url)

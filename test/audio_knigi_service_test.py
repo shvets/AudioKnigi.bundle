@@ -48,10 +48,10 @@ class AudioKnigiServiceTest(unittest.TestCase):
         self.assertEqual(pagination['has_previous'], True)
         self.assertEqual(pagination['page'], 2)
 
-    def test_get_audiobook(self):
+    def test_get_audio_tracks(self):
         path = "http://audioknigi.club/alekseev-gleb-povesti-i-rasskazy"
 
-        result = self.service.get_audiobook(path)
+        result = self.service.get_audio_tracks(path)
 
         print(json.dumps(result, indent=4))
 
