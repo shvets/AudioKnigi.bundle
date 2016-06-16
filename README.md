@@ -1,4 +1,4 @@
-# Plex Plugin for watching russian movies online from Audioboo.ru
+# Plex Plugin for watching russian movies online from AudioKnigi.club
 
 # Requirements
 
@@ -39,7 +39,9 @@ Logs are located here:
 
 OSX:
 ~/Library/Logs/Plex\ Media\ Server/PMS\ Plugin\ Logs/com.plexapp.plugins.audio_knigi.log
-~/Library/Logs/Plex\ Media\ Server.log
+~/Library/Logs/Plex\ Media\ Server/PMS\ Plugin\ Logs/com.plexapp.system.log
+~/Library/Logs/Plex\ Media\ Server/Plex\ Media\ Server.log
+
 
 # Installing core tools
 

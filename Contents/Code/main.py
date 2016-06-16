@@ -6,184 +6,115 @@ import common_routes
 from media_info import MediaInfo
 from flow_builder import FlowBuilder
 
-@route(PREFIX + '/books')
-def HandleBooks(title, page=1):
+@route(PREFIX + '/new_books')
+def HandleNewBooks(title, page=1):
     oc = ObjectContainer(title2=unicode(L(title)))
 
-    response = service.get_audiobooks(page=page)
+    response = service.get_new_books(page=page)
 
     for item in response['books']:
         name = item['name']
-        path = item['path']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleBook, path=path, name=name),
-            title=unicode(name)
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            title=unicode(name),
+            thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleNewBooks, title=title)
 
     return oc
 
-@route(PREFIX + '/book')
-def HandleBook(operation=None, **params):
-    Log(params)
+@route(PREFIX + '/best_books')
+def HandleBestBooks(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
 
-    media_info = MediaInfo(**params)
+    response = service.get_best_books(page=page)
 
-    service.queue.handle_bookmark_operation(operation, media_info)
+    for item in response['books']:
+        name = item['name']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
 
-    author = params['name']
+        oc.add(DirectoryObject(
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            title=unicode(name),
+            thumb=thumb
+        ))
 
-    oc = ObjectContainer(title2=unicode(L(author)))
-
-    response = service.get_audiobook(params['path'])
-
-    # for item in response:
-    #     path = item['path']
-    #     full_name = item['name']
-    #     content = item['content']
-    #     rating = item['rating']
-    #     thumb = service.URL + item['thumb']
-    #
-    #     full_name_decoded = full_name.decode('utf-8')
-    #     prefix = (author + ' - ').decode('utf-8')
-    #
-    #     if full_name_decoded[0:len(prefix)] == prefix:
-    #         book_name = full_name[len(prefix):]
-    #     else:
-    #         book_name = full_name
-    #
-    #     params = {
-    #         'type': 'tracks',
-    #         'id' : path,
-    #         'name': book_name,
-    #         'thumb': thumb,
-    #         'artist': author,
-    #         'content': content,
-    #         'rating': rating
-    #     }
-    #
-    #     oc.add(DirectoryObject(
-    #         key=Callback(HandleTracks, **params),
-    #         title=book_name,
-    #         thumb=thumb
-    #     ))
-
-    service.queue.append_bookmark_controls(oc, HandleBook, media_info)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBestBooks, title=title)
 
     return oc
 
+@route(PREFIX + '/authors')
+def HandleAuthors(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
 
-# @route(PREFIX + '/letters')
-# def HandleLetters():
-#     oc = ObjectContainer(title2=unicode(L("Letters")))
-#
-#     response = service.get_letters()
-#
-#     for item in response:
-#         name = item['name']
-#         path = item['path']
-#
-#         oc.add(DirectoryObject(
-#             key=Callback(HandleLetterGroup, path=path, name=name),
-#             title=name
-#         ))
-#
-#     return oc
+    response = service.get_authors(page=page)
 
-# @route(PREFIX + '/letter_group')
-# def HandleLetterGroup(path, name):
-#     oc = ObjectContainer(title2=unicode(L(name)))
-#
-#     response = service.get_authors_by_letter(path)
-#
-#     for group_name, authors in response.iteritems():
-#         oc.add(DirectoryObject(
-#             key=Callback(HandleLetter, name=group_name, authors=authors),
-#             title=group_name
-#         ))
-#
-#     return oc
-#
-# @route(PREFIX + '/letter', authors=list)
-# def HandleLetter(name, authors):
-#     oc = ObjectContainer(title2=unicode(L(name)))
-#
-#     for author in authors:
-#         name = author['name']
-#         path = author['path']
-#
-#         oc.add(DirectoryObject(
-#             key=Callback(HandleAuthor, type='author', id=path, name=name),
-#             title=name
-#         ))
-#
-#     return oc
+    for item in response['books']:
+        name = item['name']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
 
-# @route(PREFIX + '/author')
-# def HandleAuthor(operation=None, **params):
-#     media_info = MediaInfo(**params)
-#
-#     service.queue.handle_bookmark_operation(operation, media_info)
-#
-#     author = params['name']
-#
-#     oc = ObjectContainer(title2=unicode(L(author)))
-#
-#     response = service.get_author_books(params['id'])
-#
-#     for item in response:
-#         path = item['path']
-#         full_name = item['name']
-#         content = item['content']
-#         rating = item['rating']
-#         thumb = service.URL + item['thumb']
-#
-#         full_name_decoded = full_name.decode('utf-8')
-#         prefix = (author + ' - ').decode('utf-8')
-#
-#         if full_name_decoded[0:len(prefix)] == prefix:
-#             book_name = full_name[len(prefix):]
-#         else:
-#             book_name = full_name
-#
-#         params = {
-#             'type': 'tracks',
-#             'id' : path,
-#             'name': book_name,
-#             'thumb': thumb,
-#             'artist': author,
-#             'content': content,
-#             'rating': rating
-#         }
-#
-#         oc.add(DirectoryObject(
-#             key=Callback(HandleTracksVersions, **params),
-#             title=book_name,
-#             thumb=thumb
-#         ))
-#
-#     service.queue.append_bookmark_controls(oc, HandleAuthor, media_info)
-#
-#     return oc
-#
-# @route(PREFIX + '/tracks_versions')
-# def HandleTracksVersions(**params):
-#     playlist_urls = service.get_playlist_urls(params['id'])
-#
-#     if len(playlist_urls) == 1:
-#         return HandleTracks(playlist_url=playlist_urls[0], **params)
-#     else:
-#         oc = ObjectContainer(title2=unicode(L(params['name'])))
-#
-#         for index, playlist_url in enumerate(playlist_urls):
-#             oc.add(DirectoryObject(
-#                 key=Callback(HandleTracks, playlist_url=playlist_url, **params),
-#                 title="Version " + str(index+1),
-#             ))
-#
-#         return oc
+        oc.add(DirectoryObject(
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            title=unicode(name),
+            thumb=thumb
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthors, title=title)
+
+    return oc
+
+@route(PREFIX + '/performers')
+def HandlePerformers(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_performers(page=page)
+
+    for item in response['books']:
+        name = item['name']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            title=unicode(name),
+            thumb=thumb
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformers, title=title)
+
+    return oc
+
+@route(PREFIX + '/genres')
+def HandleGenres(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_genres(page=page)
+
+    for item in response['books']:
+        name = item['name']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            title=unicode(name),
+            thumb=thumb
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenres, title=title)
+
+    return oc
 
 @route(PREFIX + '/tracks')
 def HandleTracks(operation=None, container=False, **params):
@@ -193,23 +124,25 @@ def HandleTracks(operation=None, container=False, **params):
 
     oc = ObjectContainer(title2=unicode(L(params['name'])))
 
-    response = service.get_audio_tracks(params['playlist_url'])
+    response = service.get_audiobook(params['id'])
 
     for item in response:
         name = item['title']
-        duration = service.convert_track_duration(item['duration'])
-        sources = item['sources']
-        thumb = service.URL + item['image']
-        path = "https://archive.org" + sources[0]['file']
+        path = str(item['mp3'])
         format = 'mp3'
         bitrate = 0
+        duration = 10
+        thumb = params['thumb']
+        artist = params['name']
 
+        Log(path)
+        Log(type(path))
         new_params = {
             'type': 'track',
             'id': path,
             'name': name,
             'thumb': thumb,
-            'artist': params['artist'],
+            'artist': artist,
             'format': format,
             'bitrate': bitrate,
             'duration': duration
@@ -229,6 +162,8 @@ def HandleTrack(container=False, **params):
 
     url = media_info['id']
 
+    Log(url)
+
     if 'm4a' in media_info['format']:
         format = 'm4a'
     else:
@@ -236,8 +171,11 @@ def HandleTrack(container=False, **params):
 
     metadata = FlowBuilder.get_metadata(format)
 
-    metadata["bitrate"] = media_info['bitrate']
-    metadata["duration"] = media_info['duration']
+    if 'bitrate' in media_info:
+        metadata["bitrate"] = media_info['bitrate']
+
+    if 'duration' in media_info:
+        metadata["duration"] = media_info['duration']
 
     metadata_object = FlowBuilder.build_metadata_object(media_type=media_info['type'], title=media_info['name'])
 
@@ -252,6 +190,8 @@ def HandleTrack(container=False, **params):
 
     if 'artist' in media_info:
         metadata_object.artist = media_info['artist']
+
+    Log(url)
 
     media_object = FlowBuilder.build_media_object(Callback(common_routes.PlayAudio, url=url), metadata)
 

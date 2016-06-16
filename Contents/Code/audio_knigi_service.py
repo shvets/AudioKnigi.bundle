@@ -2,6 +2,14 @@
 
 from http_service import HttpService
 
+# http://audioknigi.club/index/views/?period=7
+# http://audioknigi.club/index/views/?period=30
+# http://audioknigi.club/index/views/?period=all
+# http://audioknigi.club/sections/
+# http://audioknigi.club/authors/
+# http://audioknigi.club/performers/
+
+
 class AudioKnigiService(HttpService):
     URL = 'http://audioknigi.club'
 
@@ -16,12 +24,96 @@ class AudioKnigiService(HttpService):
 
         return new_path
 
-    def get_audiobooks(self, page=1, per_page=12):
+    def get_new_books(self, page=1, per_page=12):
         data = []
 
         page_path = self.get_page_path('/', page)
 
         document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+
+        items = document.xpath('//article')
+
+        for item in items:
+            name = item.find('header/h3/a').text
+            href = item.find('header/h3/a').get('href')
+            thumb = item.find('img').get('src')
+            description = item.find('div[@class="topic-content text"]').text.strip()
+
+            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+
+        pagination = self.extract_pagination_data(page_path, page=page, per_page=per_page)
+
+        return {'books': data, 'pagination': pagination}
+
+    def get_best_books(self, page=1, per_page=12):
+        data = []
+
+        page_path = self.get_page_path('/', page)
+
+        document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+
+        items = document.xpath('//article')
+
+        for item in items:
+            name = item.find('header/h3/a').text
+            href = item.find('header/h3/a').get('href')
+            thumb = item.find('img').get('src')
+            description = item.find('div[@class="topic-content text"]').text.strip()
+
+            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+
+        pagination = self.extract_pagination_data(page_path, page=page, per_page=per_page)
+
+        return {'books': data, 'pagination': pagination}
+
+    def get_authors(self, page=1, per_page=12):
+        data = []
+
+        page_path = self.get_page_path('/', page)
+
+        document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+
+        items = document.xpath('//article')
+
+        for item in items:
+            name = item.find('header/h3/a').text
+            href = item.find('header/h3/a').get('href')
+            thumb = item.find('img').get('src')
+            description = item.find('div[@class="topic-content text"]').text.strip()
+
+            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+
+        pagination = self.extract_pagination_data(page_path, page=page, per_page=per_page)
+
+        return {'books': data, 'pagination': pagination}
+
+    def get_performers(self, page=1, per_page=12):
+        data = []
+
+        page_path = self.get_page_path('/', page)
+
+        document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+
+        items = document.xpath('//article')
+
+        for item in items:
+            name = item.find('header/h3/a').text
+            href = item.find('header/h3/a').get('href')
+            thumb = item.find('img').get('src')
+            description = item.find('div[@class="topic-content text"]').text.strip()
+
+            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+
+        pagination = self.extract_pagination_data(page_path, page=page, per_page=per_page)
+
+        return {'books': data, 'pagination': pagination}
+
+    def get_genres(self, page=1, per_page=12):
+        data = []
+
+        page_path = self.get_page_path('/', page)
+
+        document = self.fetch_document(self.URL + '/sections', encoding='utf-8')
 
         items = document.xpath('//article')
 
