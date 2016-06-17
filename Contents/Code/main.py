@@ -14,7 +14,7 @@ def HandleNewBooks(title, page=1):
 
     response = service.get_new_books(page=page)
 
-    for item in response['books']:
+    for item in response['items']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
@@ -45,7 +45,7 @@ def HandleBestBooks(title, page=1):
 
     response = service.get_best_books(page=page)
 
-    for item in response['books']:
+    for item in response['items']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
@@ -67,12 +67,12 @@ def HandleAuthors(title, page=1):
 
     response = service.get_authors(page=page)
 
-    for item in response['authors']:
+    for item in response['items']:
         name = item['name']
-        id = item['path']
+        url = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleAuthorBooks, id=id, name=name),
+            key=Callback(HandleBooks, url=url, name=name),
             title=unicode(name)
         ))
 
@@ -80,13 +80,13 @@ def HandleAuthors(title, page=1):
 
     return oc
 
-@route(PREFIX + '/author_books')
-def HandleAuthorBooks(title, page=1):
-    oc = ObjectContainer(title2=unicode(L(title)))
+@route(PREFIX + '/books')
+def HandleBooks(name, url, page=1):
+    oc = ObjectContainer(title2=unicode(L(name)))
 
-    response = service.get_author_books(page=page)
+    response = service.get_books(url=url, page=page)
 
-    for item in response['books']:
+    for item in response['items']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
@@ -107,7 +107,7 @@ def HandleAuthorBooks(title, page=1):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthorBooks, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=name, url=url)
 
     return oc
 
@@ -117,47 +117,16 @@ def HandlePerformers(title, page=1):
 
     response = service.get_performers(page=page)
 
-    for item in response['performers']:
+    for item in response['items']:
         name = item['name']
-        id = item['path']
+        url = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandlePerformerBooks, id=id, name=name),
+            key=Callback(HandleBooks, url=url, name=name),
             title=unicode(name)
         ))
 
     pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformers, title=title)
-
-    return oc
-
-@route(PREFIX + '/performer_books')
-def HandlePerformerBooks(title, page=1):
-    oc = ObjectContainer(title2=unicode(L(title)))
-
-    response = service.get_performer_books(page=page)
-
-    for item in response['books']:
-        name = item['name']
-        id = item['path']
-        thumb = item['thumb']
-        description = item['description']
-
-        new_params = {
-            'type': 'tracks',
-            'id': id,
-            'name': name,
-            'thumb': thumb,
-            # 'artist': author,
-            'content': description,
-            # 'rating': rating
-        }
-        oc.add(DirectoryObject(
-            key=Callback(HandleTracks, **new_params),
-            title=unicode(name),
-            thumb=thumb
-        ))
-
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformerBooks, title=title)
 
     return oc
 
@@ -167,7 +136,7 @@ def HandleGenres(title, page=1):
 
     response = service.get_genres(page=page)
 
-    for item in response['genres']:
+    for item in response['items']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
@@ -188,7 +157,7 @@ def HandleGenre(title, id, page=1):
 
     response = service.get_genres(page=page)
 
-    for item in response['genres']:
+    for item in response['items']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']

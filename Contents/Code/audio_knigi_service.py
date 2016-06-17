@@ -19,14 +19,17 @@ class AudioKnigiService(HttpService):
         return True
 
     def get_page_path(self, path, page=1):
-        return path + "page" + str(page)
+        return path + "page" + str(page) + "/"
 
     def get_new_books(self, page=1):
+        return self.get_books(url=self.URL+'/index/', page=page)
+
+    def get_books(self, url, page=1):
         data = []
 
-        page_path = self.get_page_path('/index/', page)
+        page_path = self.get_page_path(url + '/', page)
 
-        document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+        document = self.fetch_document(page_path, encoding='utf-8')
 
         items = document.xpath('//article')
 
@@ -38,9 +41,9 @@ class AudioKnigiService(HttpService):
 
             data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
 
-        pagination = self.extract_pagination_data(page_path, page=page)
+        pagination = self.extract_pagination_data(document, page=page)
 
-        return {'books': data, 'pagination': pagination}
+        return {'items': data, 'pagination': pagination}
 
     def get_best_books(self, page=1):
         data = []
@@ -59,9 +62,9 @@ class AudioKnigiService(HttpService):
 
             data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
 
-        pagination = self.extract_pagination_data(page_path, page=page)
+        pagination = self.extract_pagination_data(document, page=page)
 
-        return {'books': data, 'pagination': pagination}
+        return {'items': data, 'pagination': pagination}
 
     def get_authors(self, page=1):
         data = []
@@ -79,9 +82,9 @@ class AudioKnigiService(HttpService):
 
             data.append({'name': name, 'path': href})
 
-        pagination = self.extract_pagination_data(page_path, page=page)
+        pagination = self.extract_pagination_data(document, page=page)
 
-        return {'authors': data, 'pagination': pagination}
+        return {'items': data, 'pagination': pagination}
 
     def get_performers(self, page=1):
         data = []
@@ -99,9 +102,9 @@ class AudioKnigiService(HttpService):
 
             data.append({'name': name, 'path': href})
 
-        pagination = self.extract_pagination_data(page_path, page=page)
+        pagination = self.extract_pagination_data(document, page=page)
 
-        return {'performers': data, 'pagination': pagination}
+        return {'items': data, 'pagination': pagination}
 
     def get_genres(self, page=1):
         data = []
@@ -120,14 +123,12 @@ class AudioKnigiService(HttpService):
 
             data.append({'name': name, 'path': href, 'thumb': thumb})
 
-        pagination = self.extract_pagination_data(page_path, page=page)
+        pagination = self.extract_pagination_data(document, page=page)
 
-        return {'genres': data, 'pagination': pagination}
+        return {'items': data, 'pagination': pagination}
 
-    def extract_pagination_data(self, path, page):
+    def extract_pagination_data(self, document, page):
         page = int(page)
-
-        document = self.fetch_document(self.URL + path)
 
         pages = 1
 
