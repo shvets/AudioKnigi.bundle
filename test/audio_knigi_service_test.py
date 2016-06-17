@@ -11,8 +11,8 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def setUp(self):
         self.service = AudioKnigiService()
 
-    def test_get_books(self):
-        result = self.service.get_books()
+    def test_get_new_books(self):
+        result = self.service.get_new_books()
 
         print(json.dumps(result, indent=4))
 
@@ -21,13 +21,17 @@ class AudioKnigiServiceTest(unittest.TestCase):
 
         print(json.dumps(result, indent=4))
 
-    def test_get_artists(self):
-        result = self.service.get_artists()
+    def test_get_performers(self):
+        result = self.service.get_performers()
 
         print(json.dumps(result, indent=4))
 
     def test_get_genres(self):
-        result = self.service.get_genres()
+        result = self.service.get_genres(page=1)
+
+        print(json.dumps(result, indent=4))
+
+        result = self.service.get_genres(page=2)
 
         print(json.dumps(result, indent=4))
 

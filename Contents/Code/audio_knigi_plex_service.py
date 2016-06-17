@@ -9,4 +9,5 @@ class AudioKnigiPlexService(AudioKnigiService):
         self.queue = PlexStorage(storage_name)
 
         self.queue.register_simple_type('author')
+        self.queue.register_simple_type('performer')
         self.queue.register_simple_type('tracks')

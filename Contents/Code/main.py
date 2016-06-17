@@ -67,19 +67,47 @@ def HandleAuthors(title, page=1):
 
     response = service.get_authors(page=page)
 
+    for item in response['authors']:
+        name = item['name']
+        id = item['path']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandleAuthorBooks, id=id, name=name),
+            title=unicode(name)
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthors, title=title)
+
+    return oc
+
+@route(PREFIX + '/author_books')
+def HandleAuthorBooks(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_author_books(page=page)
+
     for item in response['books']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
         description = item['description']
 
+        new_params = {
+            'type': 'tracks',
+            'id': id,
+            'name': name,
+            'thumb': thumb,
+            # 'artist': author,
+            'content': description,
+            # 'rating': rating
+        }
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            key=Callback(HandleTracks, **new_params),
             title=unicode(name),
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthors, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthorBooks, title=title)
 
     return oc
 
@@ -89,19 +117,47 @@ def HandlePerformers(title, page=1):
 
     response = service.get_performers(page=page)
 
+    for item in response['performers']:
+        name = item['name']
+        id = item['path']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandlePerformerBooks, id=id, name=name),
+            title=unicode(name)
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformers, title=title)
+
+    return oc
+
+@route(PREFIX + '/performer_books')
+def HandlePerformerBooks(title, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_performer_books(page=page)
+
     for item in response['books']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
         description = item['description']
 
+        new_params = {
+            'type': 'tracks',
+            'id': id,
+            'name': name,
+            'thumb': thumb,
+            # 'artist': author,
+            'content': description,
+            # 'rating': rating
+        }
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            key=Callback(HandleTracks, **new_params),
             title=unicode(name),
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformers, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformerBooks, title=title)
 
     return oc
 
@@ -111,14 +167,34 @@ def HandleGenres(title, page=1):
 
     response = service.get_genres(page=page)
 
-    for item in response['books']:
+    for item in response['genres']:
         name = item['name']
         id = item['path']
         thumb = item['thumb']
-        description = item['description']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            key=Callback(HandleGenre, title=name, id=id),
+            title=unicode(name),
+            thumb=thumb
+        ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenres, title=title)
+
+    return oc
+
+@route(PREFIX + '/genre')
+def HandleGenre(title, id, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_genres(page=page)
+
+    for item in response['genres']:
+        name = item['name']
+        id = item['path']
+        thumb = item['thumb']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandleTracks, id=id, name=name, thumb=thumb),
             title=unicode(name),
             thumb=thumb
         ))
@@ -220,7 +296,9 @@ def HandleContainer(**params):
     type = params['type']
 
     if type == 'author':
-        return HandleAuthor(**params)
+        return HandleAuthorBooks(**params)
+    if type == 'performer':
+        return HandlePerformerBooks(**params)
     elif type == 'tracks':
         return HandleTracks(**params)
 
