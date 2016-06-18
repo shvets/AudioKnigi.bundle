@@ -96,5 +96,12 @@ class AudioKnigiServiceTest(unittest.TestCase):
 
         print(json.dumps(result, indent=4))
 
+    def test_search(self):
+        query = 'пратчетт'
+
+        result = self.service.search(query)
+
+        print(json.dumps(result, indent=4))
+
 if __name__ == '__main__':
     unittest.main()

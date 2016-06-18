@@ -8,8 +8,6 @@ from http_service import HttpService
 # topic_author_text:Б
 # isPrefix:1
 # security_ls_key:592d84b7ba51106f38c5861139e8e420
-# http://audioknigi.club/search/books/?q=%D0%BF%D1%80%D0%B0%D1%82%D1%87%D0%B5%D1%82%D1%82
-# q:пратчетт
 
 class AudioKnigiService(HttpService):
     URL = 'http://audioknigi.club'
@@ -158,3 +156,27 @@ class AudioKnigiService(HttpService):
 
             return self.to_json(self.http_request(new_url).read())
 
+    def search(self, query, page=1):
+        path = '/search/books/'
+
+        url = self.URL + path
+
+        content = self.http_request(url, data={'q': query}).read()
+
+        document = self.to_document(content, encoding='utf-8')
+
+        data = []
+
+        items = document.xpath('//article')
+
+        for item in items:
+            name = item.find('header/h3/a').text
+            href = item.find('header/h3/a').get('href')
+            thumb = item.find('img').get('src')
+            description = item.find('div[@class="topic-content text"]').text.strip()
+
+            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+
+        pagination = self.extract_pagination_data(document, path=path, page=page)
+
+        return {'items': data, 'pagination': pagination}
