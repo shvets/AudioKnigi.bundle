@@ -4,11 +4,6 @@ import urllib
 
 from http_service import HttpService
 
-# POST http://audioknigi.club/authors/ajax-search/
-# topic_author_text:Б
-# isPrefix:1
-# security_ls_key:592d84b7ba51106f38c5861139e8e420
-
 class AudioKnigiService(HttpService):
     URL = 'http://audioknigi.club'
 
@@ -17,6 +12,20 @@ class AudioKnigiService(HttpService):
 
     def get_page_path(self, path, page=1):
         return path + "page" + str(page) + "/"
+
+    def get_letters(self, path):
+        data = []
+
+        document = self.fetch_document(self.URL + path)
+
+        items = document.xpath('//ul[@id="author-prefix-filter"]/li/a')
+
+        for item in items:
+            name = item.text_content()
+
+            data.append(name)
+
+        return data
 
     def get_new_books(self, page=1):
         return self.get_books(path='/index/', page=page)
@@ -88,7 +97,7 @@ class AudioKnigiService(HttpService):
         for item in items:
             link = item.find('a')
             name = item.find('h4/a').text
-            href = link.get('href')
+            href = link.get('href')[len(self.URL):]
             thumb = link.find('img').get('src')
 
             data.append({'name': name, 'path': href, 'thumb': thumb})
@@ -96,6 +105,9 @@ class AudioKnigiService(HttpService):
         pagination = self.extract_pagination_data(document, path=path, page=page)
 
         return {'items': data, 'pagination': pagination}
+
+    def get_genre(self, path, page=1):
+        return self.get_books(path=path, page=page)
 
     def extract_pagination_data(self, document, path, page):
         page = int(page)
@@ -180,3 +192,38 @@ class AudioKnigiService(HttpService):
         pagination = self.extract_pagination_data(document, path=path, page=page)
 
         return {'items': data, 'pagination': pagination}
+
+    def search_by_letter(self, letter):
+        path = '/authors/ajax-search/'
+
+        url = self.URL + path
+
+        data = {
+            'topic_author_text': letter,
+            'sPrefix': 1,
+            'security_ls_key': '592d84b7ba51106f38c5861139e8e420'
+        }
+
+        content = self.http_request(url, data=data, method='POST').read()
+
+        document = self.to_document(content, encoding='utf-8')
+
+        print content
+
+        data = []
+
+        # items = document.xpath('//article')
+        #
+        # for item in items:
+        #     name = item.find('header/h3/a').text
+        #     href = item.find('header/h3/a').get('href')
+        #     thumb = item.find('img').get('src')
+        #     description = item.find('div[@class="topic-content text"]').text.strip()
+        #
+        #     data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+        #
+        # pagination = self.extract_pagination_data(document, path=path, page=page)
+        #
+        # return {'items': data, 'pagination': pagination}
+
+        return data

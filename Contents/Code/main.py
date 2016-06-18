@@ -43,7 +43,28 @@ def HandleNewBooks(title, page=1):
 def HandleBestBooks(title, page=1):
     oc = ObjectContainer(title2=unicode(L(title)))
 
-    response = service.get_best_books(page=page)
+    oc.add(DirectoryObject(
+        key=Callback(HandleBestBooksByPeriod, title=unicode(L("By Week")), period='7'),
+        title=unicode(L("By Week"))
+    ))
+
+    oc.add(DirectoryObject(
+        key=Callback(HandleBestBooksByPeriod, title=unicode(L("By Month")), period='30'),
+        title=unicode(L("By Month"))
+    ))
+
+    oc.add(DirectoryObject(
+        key=Callback(HandleBestBooksByPeriod, title=unicode(L("All Time")), period='all'),
+        title=unicode(L("All Time"))
+    ))
+
+    return oc
+
+@route(PREFIX + '/best_books_by_period')
+def HandleBestBooksByPeriod(title, period, page=1):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_best_books(period=period, page=page)
 
     for item in response['items']:
         name = item['name']
@@ -57,7 +78,7 @@ def HandleBestBooks(title, page=1):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBestBooks, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBestBooksByPeriod, title=title, period=period)
 
     return oc
 
@@ -138,11 +159,11 @@ def HandleGenres(title, page=1):
 
     for item in response['items']:
         name = item['name']
-        id = item['path']
+        path = item['path']
         thumb = item['thumb']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleGenre, title=name, id=id),
+            key=Callback(HandleGenre, title=name, path=path),
             title=unicode(name),
             thumb=thumb
         ))
@@ -152,10 +173,10 @@ def HandleGenres(title, page=1):
     return oc
 
 @route(PREFIX + '/genre')
-def HandleGenre(title, id, page=1):
+def HandleGenre(title, path, page=1):
     oc = ObjectContainer(title2=unicode(L(title)))
 
-    response = service.get_genres(page=page)
+    response = service.get_genre(path=path, page=page)
 
     for item in response['items']:
         name = item['name']
@@ -168,7 +189,7 @@ def HandleGenre(title, id, page=1):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenres, title=title)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenre, title=title, path=path)
 
     return oc
 
@@ -277,12 +298,12 @@ def HandleSearch(query=None):
 
     response = service.search(query=query)
 
-    for movie in response:
-        name = movie['name']
-        path = movie['path']
+    for item in response['items']:
+        name = item['name']
+        path = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleAuthor, id=path, name=name),
+            key=Callback(HandleTracks, id=path, name=name),
             title=unicode(name)
         ))
 

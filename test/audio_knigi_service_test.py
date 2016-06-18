@@ -11,6 +11,11 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def setUp(self):
         self.service = AudioKnigiService()
 
+    def test_get_letters(self):
+        result = self.service.get_letters(path='/authors/')
+
+        print(json.dumps(result, indent=4))
+
     def test_get_new_books(self):
         result = self.service.get_new_books()
 
@@ -68,6 +73,15 @@ class AudioKnigiServiceTest(unittest.TestCase):
 
         print(json.dumps(result, indent=4))
 
+    def test_get_genre(self):
+        genres = self.service.get_genres(page=1)
+
+        path = genres['items'][0]['path']
+
+        result = self.service.get_genre(path=path)
+
+        print(json.dumps(result, indent=4))
+
     def test_pagination(self):
         result = self.service.get_new_books(page=1)
 
@@ -102,6 +116,13 @@ class AudioKnigiServiceTest(unittest.TestCase):
         result = self.service.search(query)
 
         print(json.dumps(result, indent=4))
+
+    # def test_search_by_letter(self):
+    #     letter = 'Б'
+    #
+    #     result = self.service.search_by_letter(letter)
+    #
+    #     print(json.dumps(result, indent=4))
 
 if __name__ == '__main__':
     unittest.main()
