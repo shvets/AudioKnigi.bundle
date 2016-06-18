@@ -40,7 +40,7 @@ def HandleNewBooks(title, page=1):
     return oc
 
 @route(PREFIX + '/best_books')
-def HandleBestBooks(title, page=1):
+def HandleBestBooks(title):
     oc = ObjectContainer(title2=unicode(L(title)))
 
     oc.add(DirectoryObject(
@@ -293,19 +293,33 @@ def HandleContainer(**params):
         return HandleTracks(**params)
 
 @route(PREFIX + '/search')
-def HandleSearch(query=None):
+def HandleSearch(query, page=1):
     oc = ObjectContainer(title2=unicode(L('Search')))
 
-    response = service.search(query=query)
+    response = service.search(query=query, page=page)
 
     for item in response['items']:
         name = item['name']
-        path = item['path']
+        id = item['path']
+        thumb = item['thumb']
+        description = item['description']
 
+        new_params = {
+            'type': 'tracks',
+            'id': id,
+            'name': name,
+            'thumb': thumb,
+            # 'artist': author,
+            'content': description,
+            # 'rating': rating
+        }
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=path, name=name),
-            title=unicode(name)
+            key=Callback(HandleTracks, **new_params),
+            title=unicode(name),
+            thumb=thumb
         ))
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleSearch, query=query)
 
     return oc
 

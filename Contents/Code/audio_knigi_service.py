@@ -34,14 +34,17 @@ class AudioKnigiService(HttpService):
         return self.get_books(path='/index/views/', period=period, page=page)
 
     def get_books(self, path, period=None, page=1):
-        data = []
-
         page_path = self.get_page_path(path + '/', page)
 
         if period:
             page_path = page_path + "?period=" + period
 
         document = self.fetch_document(self.URL + page_path, encoding='utf-8')
+
+        return self.get_book_items(document, path=path, page=page)
+
+    def get_book_items(self, document, path, page):
+        data = []
 
         items = document.xpath('//article')
 
@@ -171,59 +174,51 @@ class AudioKnigiService(HttpService):
     def search(self, query, page=1):
         path = '/search/books/'
 
-        url = self.URL + path
+        page_path = self.get_page_path(path, page)
 
-        content = self.http_request(url, data={'q': query}).read()
-
-        document = self.to_document(content, encoding='utf-8')
-
-        data = []
-
-        items = document.xpath('//article')
-
-        for item in items:
-            name = item.find('header/h3/a').text
-            href = item.find('header/h3/a').get('href')
-            thumb = item.find('img').get('src')
-            description = item.find('div[@class="topic-content text"]').text.strip()
-
-            data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
-
-        pagination = self.extract_pagination_data(document, path=path, page=page)
-
-        return {'items': data, 'pagination': pagination}
-
-    def search_by_letter(self, letter):
-        path = '/authors/ajax-search/'
-
-        url = self.URL + path
-
-        data = {
-            'topic_author_text': letter,
-            'sPrefix': 1,
-            'security_ls_key': '592d84b7ba51106f38c5861139e8e420'
-        }
-
-        content = self.http_request(url, data=data, method='POST').read()
+        content = self.http_request(self.URL + page_path, data={'q': query}).read()
 
         document = self.to_document(content, encoding='utf-8')
 
-        print content
+        return self.get_book_items(document, path=path, page=page)
 
-        data = []
-
-        # items = document.xpath('//article')
-        #
-        # for item in items:
-        #     name = item.find('header/h3/a').text
-        #     href = item.find('header/h3/a').get('href')
-        #     thumb = item.find('img').get('src')
-        #     description = item.find('div[@class="topic-content text"]').text.strip()
-        #
-        #     data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
-        #
-        # pagination = self.extract_pagination_data(document, path=path, page=page)
-        #
-        # return {'items': data, 'pagination': pagination}
-
-        return data
+    # def search_by_letter(self, letter, page=1):
+    #     path = '/authors/ajax-search/'
+    #
+    #     url = self.URL + path
+    #
+    #     response = self.http_request(url)
+    #
+    #     cookie = response.headers['Set-Cookie']
+    #
+    #     headers = {
+    #         "X-Requested-With": "XMLHttpRequest"
+    #     }
+    #
+    #     data = {
+    #         'topic_author_text': letter,
+    #         'sPrefix': 1,
+    #         'security_ls_key': '592d84b7ba51106f38c5861139e8e420'
+    #     }
+    #
+    #     content = self.http_request(url, data=data, headers=headers, method='POST').read()
+    #
+    #     print content
+    #
+    #     document = self.to_document(content, encoding='utf-8')
+    #
+    #     data = []
+    #
+    #     items = document.xpath('//article')
+    #
+    #     for item in items:
+    #         name = item.find('header/h3/a').text
+    #         href = item.find('header/h3/a').get('href')
+    #         thumb = item.find('img').get('src')
+    #         description = item.find('div[@class="topic-content text"]').text.strip()
+    #
+    #         data.append({'name': name, 'path': href, 'thumb': thumb, 'description': description})
+    #
+    #     pagination = self.extract_pagination_data(document, path=path, page=page)
+    #
+    #     return {'items': data, 'pagination': pagination}

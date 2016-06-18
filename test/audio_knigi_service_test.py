@@ -11,10 +11,10 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def setUp(self):
         self.service = AudioKnigiService()
 
-    def test_get_letters(self):
-        result = self.service.get_letters(path='/authors/')
-
-        print(json.dumps(result, indent=4))
+    # def test_get_letters(self):
+    #     result = self.service.get_letters(path='/authors/')
+    #
+    #     print(json.dumps(result, indent=4))
 
     def test_get_new_books(self):
         result = self.service.get_new_books()
