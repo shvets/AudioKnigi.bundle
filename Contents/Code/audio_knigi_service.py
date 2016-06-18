@@ -31,8 +31,7 @@ class AudioKnigiService(HttpService):
         for item in items:
             name = item.text_content()
 
-            if name != "Все":
-                data.append(name)
+            data.append(name)
 
         return data
 
@@ -256,7 +255,7 @@ class AudioKnigiService(HttpService):
             group_weight = len(groups[group_name])
             group_size += group_weight
 
-            if group_size > 20:
+            if group_size > 20 or self.starts_with_different_letter(classifier[index], group_name):
                 group_size = 0
                 classifier.append([])
                 index = index + 1
@@ -277,6 +276,18 @@ class AudioKnigiService(HttpService):
                     new_groups[key].append(item)
 
         return new_groups
+
+    def starts_with_different_letter(self, list, name):
+        result = False
+
+        for n in list:
+            if name[0] != n[0]:
+                result = True
+                break
+
+        return result
+
+
 
     # def search_by_letter(self, letter, page=1):
     #     path = '/authors/ajax-search/'

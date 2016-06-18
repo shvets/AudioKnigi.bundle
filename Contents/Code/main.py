@@ -99,7 +99,7 @@ def HandleAuthorsLetters(title):
 
     for letter in response:
         oc.add(DirectoryObject(
-            key=Callback(HandleLetterGroup, letter=letter, type='authors'),
+            key=Callback(HandleAuthorsLetterGroup, letter=letter),
             title=unicode(letter)
         ))
 
@@ -113,27 +113,64 @@ def HandlePerformersLetters(title):
 
     for letter in response:
         oc.add(DirectoryObject(
-            key=Callback(HandleLetterGroup, letter=letter, type='performers'),
+            key=Callback(HandlePerformersLetterGroup, letter=letter),
             title=unicode(letter)
         ))
 
     return oc
 
-@route(PREFIX + '/letter_group')
-def HandleLetterGroup(letter, type):
+@route(PREFIX + '/authors_letter_group')
+def HandleAuthorsLetterGroup(letter, page=1):
     oc = ObjectContainer(title2=unicode(L(letter)))
 
-    if type == 'authors':
-        items = authors
-    else:
-        items = performers
+    if letter == "Все":
+        response = service.get_authors(page=page)
 
-    for group_name, group in items.iteritems():
-        if group_name.find(letter) == 0:
+        for item in response['items']:
+            name = item['name']
+            url = item['path']
+
             oc.add(DirectoryObject(
-                key=Callback(HandleLetter, name=group_name, items=group),
-                title=group_name
+                key=Callback(HandleBooks, url=url, name=name),
+                title=unicode(name)
             ))
+
+        pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthorsLetterGroup, letter=letter)
+    else:
+        for group_name, group in authors.iteritems():
+            if group_name.find(letter) == 0:
+                oc.add(DirectoryObject(
+                    key=Callback(HandleLetter, name=group_name, items=group),
+                    title=group_name
+                ))
+
+    return oc
+
+
+@route(PREFIX + '/performers_letter_group')
+def HandlePerformersLetterGroup(letter, page=1):
+    oc = ObjectContainer(title2=unicode(L(letter)))
+
+    if letter == "Все":
+        response = service.get_performers(page=page)
+
+        for item in response['items']:
+            name = item['name']
+            url = item['path']
+
+            oc.add(DirectoryObject(
+                key=Callback(HandleBooks, url=url, name=name),
+                title=unicode(name)
+            ))
+
+        pagination.append_controls(oc, response['pagination'], page=page, callback=HandlePerformersLetterGroup, letter=letter)
+    else:
+        for group_name, group in performers.iteritems():
+            if group_name.find(letter) == 0:
+                oc.add(DirectoryObject(
+                    key=Callback(HandleLetter, name=group_name, items=group),
+                    title=group_name
+                ))
 
     return oc
 
