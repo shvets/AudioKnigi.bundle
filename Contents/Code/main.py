@@ -300,7 +300,7 @@ def HandleTracks(operation=None, container=False, **params):
 
         format = 'mp3'
         bitrate = 0
-        duration = 100000
+        duration = item['duration']
         thumb = str(params['thumb'])
         artist = params['name']
 

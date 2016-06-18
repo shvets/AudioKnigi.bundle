@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import urllib
 import json
 from collections import OrderedDict
@@ -177,7 +178,21 @@ class AudioKnigiService(HttpService):
         if book_id:
             new_url = self.URL + "/rest/bid/" + book_id
 
-            return self.to_json(self.http_request(new_url).read())
+            tracks = self.to_json(self.http_request(new_url).read())
+
+            for track in tracks:
+                track['mp3'] = track['mp3'].encode('utf-8')
+
+                response = urllib.urlopen(track['mp3'])
+                size = response.headers.get("Content-Length")
+
+                track['duration'] = int(float(size) / 1024.0 / 1024.0 * 2.5 * 60 * 1000)
+
+                # text = os.system('ffmpeg -i "' + track['mp3'] + '"')
+                #
+                # print text
+
+            return tracks
 
     def search(self, query, page=1):
         path = '/search/books/'
@@ -286,8 +301,6 @@ class AudioKnigiService(HttpService):
                 break
 
         return result
-
-
 
     # def search_by_letter(self, letter, page=1):
     #     path = '/authors/ajax-search/'
