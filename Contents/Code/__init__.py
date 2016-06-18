@@ -62,8 +62,8 @@ def MainMenu():
 
     oc.add(DirectoryObject(key=Callback(main.HandleNewBooks, title=unicode(L('New Books'))), title=unicode(L('New Books'))))
     oc.add(DirectoryObject(key=Callback(main.HandleBestBooks, title=unicode(L('Best Books'))), title=unicode(L('Best Books'))))
-    oc.add(DirectoryObject(key=Callback(main.HandleAuthors, title=unicode(L('Authors'))), title=unicode(L('Authors'))))
-    oc.add(DirectoryObject(key=Callback(main.HandlePerformers, title=unicode(L('Performers'))), title=unicode(L('Performers'))))
+    oc.add(DirectoryObject(key=Callback(main.HandleAuthorsLetters, title=unicode(L('Authors'))), title=unicode(L('Authors'))))
+    oc.add(DirectoryObject(key=Callback(main.HandlePerformersLetters, title=unicode(L('Performers'))), title=unicode(L('Performers'))))
     oc.add(DirectoryObject(key=Callback(main.HandleGenres, title=unicode(L('Genres'))), title=unicode(L('Genres'))))
     oc.add(DirectoryObject(key=Callback(main.HandleHistory), title=unicode(L('History'))))
     oc.add(DirectoryObject(key=Callback(main.HandleQueue), title=unicode(L('Queue'))))

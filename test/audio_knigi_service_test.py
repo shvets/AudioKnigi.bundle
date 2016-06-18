@@ -11,10 +11,15 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def setUp(self):
         self.service = AudioKnigiService()
 
-    # def test_get_letters(self):
-    #     result = self.service.get_letters(path='/authors/')
-    #
-    #     print(json.dumps(result, indent=4))
+    def test_get_authors_letters(self):
+        result = self.service.get_authors_letters()
+
+        print(json.dumps(result, indent=4))
+
+    def test_get_performers_letters(self):
+        result = self.service.get_performers_letters()
+
+        print(json.dumps(result, indent=4))
 
     def test_get_new_books(self):
         result = self.service.get_new_books()
@@ -123,6 +128,11 @@ class AudioKnigiServiceTest(unittest.TestCase):
     #     result = self.service.search_by_letter(letter)
     #
     #     print(json.dumps(result, indent=4))
+
+    def test_generate_authors_list(self):
+        result = self.service.generate_authors_list('authors.json')
+
+        print(json.dumps(result, indent=4))
 
 if __name__ == '__main__':
     unittest.main()

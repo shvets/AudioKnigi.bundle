@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+import json
 
 import history
 import pagination
 import common_routes
 from media_info import MediaInfo
 from flow_builder import FlowBuilder
+
+authors_file_name = Core.storage.abs_path(Core.storage.join_path(Core.bundle_path, 'Contents', 'authors.json'))
+authors = json.loads(Core.storage.load(authors_file_name))
+authors = service.group_items_by_letter(authors)
+
+performers_file_name = Core.storage.abs_path(Core.storage.join_path(Core.bundle_path, 'Contents', 'performers.json'))
+performers = json.loads(Core.storage.load(performers_file_name))
+performers = service.group_items_by_letter(performers)
 
 @route(PREFIX + '/new_books')
 def HandleNewBooks(title, page=1):
@@ -82,30 +91,74 @@ def HandleBestBooksByPeriod(title, period, page=1):
 
     return oc
 
-@route(PREFIX + '/authors')
-def HandleAuthors(title, page=1):
+@route(PREFIX + '/authors_letters')
+def HandleAuthorsLetters(title):
     oc = ObjectContainer(title2=unicode(L(title)))
 
-    response = service.get_authors(page=page)
+    response = service.get_authors_letters()
 
-    for item in response['items']:
+    for letter in response:
+        oc.add(DirectoryObject(
+            key=Callback(HandleLetterGroup, letter=letter, type='authors'),
+            title=unicode(letter)
+        ))
+
+    return oc
+
+@route(PREFIX + '/performers_letters')
+def HandlePerformersLetters(title):
+    oc = ObjectContainer(title2=unicode(L(title)))
+
+    response = service.get_performers_letters()
+
+    for letter in response:
+        oc.add(DirectoryObject(
+            key=Callback(HandleLetterGroup, letter=letter, type='performers'),
+            title=unicode(letter)
+        ))
+
+    return oc
+
+@route(PREFIX + '/letter_group')
+def HandleLetterGroup(letter, type):
+    oc = ObjectContainer(title2=unicode(L(letter)))
+
+    if type == 'authors':
+        items = authors
+    else:
+        items = performers
+
+    for group_name, group in items.iteritems():
+        if group_name.find(letter) == 0:
+            oc.add(DirectoryObject(
+                key=Callback(HandleLetter, name=group_name, items=group),
+                title=group_name
+            ))
+
+    return oc
+
+@route(PREFIX + '/letter', items=list)
+def HandleLetter(name, items):
+    oc = ObjectContainer(title2=unicode(L(name)))
+
+    for item in items:
         name = item['name']
-        url = item['path']
+        path = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleBooks, url=url, name=name),
+            key=Callback(HandleBooks, name=name, path=path),
             title=unicode(name)
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleAuthors, title=title)
+    # pagination.append_controls(oc, response['pagination'], page=page, callback=HandleLetter, name=name)
 
     return oc
 
 @route(PREFIX + '/books')
-def HandleBooks(name, url, page=1):
+def HandleBooks(name, path, page=1):
     oc = ObjectContainer(title2=unicode(L(name)))
 
-    response = service.get_books(url=url, page=page)
+    response = service.get_books(path=path, page=page)
 
     for item in response['items']:
         name = item['name']
@@ -128,7 +181,7 @@ def HandleBooks(name, url, page=1):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=name, url=url)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=name, path=path)
 
     return oc
 

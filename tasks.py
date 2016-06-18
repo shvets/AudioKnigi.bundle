@@ -179,4 +179,17 @@ def plex_uninstall():
     run("rm -rf ~/Library/Caches/PlexMediaServer/")
     run("rm -rf ~/Library/Preferences/com.plexapp.plexmediaserver.plist")
 
+@task
+def gen_data():
+    import sys, os
+
+    sys.path.append('Contents/Code')
+    sys.path.append('Contents/Libraries/Shared')
+
+    from audio_knigi_service import AudioKnigiService
+    service = AudioKnigiService()
+
+    service.generate_authors_list('Contents/authors.json')
+    service.generate_performers_list('Contents/performers.json')
+
 

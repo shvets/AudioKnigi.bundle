@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+import json
+from collections import OrderedDict
 
 from http_service import HttpService
 
@@ -13,17 +15,24 @@ class AudioKnigiService(HttpService):
     def get_page_path(self, path, page=1):
         return path + "page" + str(page) + "/"
 
-    def get_letters(self, path):
+    def get_authors_letters(self):
+        return self.get_letters(path='/authors/', filter='author-prefix-filter')
+
+    def get_performers_letters(self):
+        return self.get_letters(path='/performers/', filter='performer-prefix-filter')
+
+    def get_letters(self, path, filter):
         data = []
 
-        document = self.fetch_document(self.URL + path)
+        document = self.fetch_document(self.URL + path, encoding='utf-8')
 
-        items = document.xpath('//ul[@id="author-prefix-filter"]/li/a')
+        items = document.xpath('//ul[@id="' + filter + '"]/li/a')
 
         for item in items:
             name = item.text_content()
 
-            data.append(name)
+            if name != "Все":
+                data.append(name)
 
         return data
 
@@ -181,6 +190,93 @@ class AudioKnigiService(HttpService):
         document = self.to_document(content, encoding='utf-8')
 
         return self.get_book_items(document, path=path, page=page)
+
+    def generate_authors_list(self, fileName):
+        data = []
+
+        result = self.get_authors()
+
+        data += result['items']
+
+        pages = result['pagination']['pages']
+
+        for page in range(2, pages):
+            result = self.get_authors(page=page)
+
+            data += result['items']
+
+        with open(fileName, 'w') as file:
+            file.write(json.dumps(data, indent=4))
+
+    def generate_performers_list(self, fileName):
+        data = []
+
+        result = self.get_performers()
+
+        data += result['items']
+
+        pages = result['pagination']['pages']
+
+        for page in range(2, pages):
+            result = self.get_performers(page=page)
+
+            data += result['items']
+
+        with open(fileName, 'w') as file:
+            file.write(json.dumps(data, indent=4))
+
+    def group_items_by_letter(self, items):
+        groups = OrderedDict()
+
+        for item in items:
+            name = item['name']
+            path = item['path']
+
+            group_name = name[0:3].upper()
+
+            if group_name not in groups.keys():
+                group = []
+
+                groups[group_name] = group
+
+            groups[group_name].append({'path': path, 'name': name})
+
+        return self.merge_small_groups(groups)
+
+    def merge_small_groups(self, groups):
+        # merge groups into bigger groups with size ~ 20 records
+
+        classifier = []
+
+        group_size = 0
+        classifier.append([])
+        index = 0
+
+        for group_name in groups:
+            group_weight = len(groups[group_name])
+            group_size += group_weight
+
+            if group_size > 20:
+                group_size = 0
+                classifier.append([])
+                index = index + 1
+
+            classifier[index].append(group_name)
+
+        # flatten records from different group within same classification
+        # assign new name in format first_name-last_name, e.g. ABC-AZZ
+
+        new_groups = OrderedDict()
+
+        for group_names in classifier:
+            key = group_names[0] + "-" + group_names[len(group_names) - 1]
+            new_groups[key] = []
+
+            for group_name in group_names:
+                for item in groups[group_name]:
+                    new_groups[key].append(item)
+
+        return new_groups
 
     # def search_by_letter(self, letter, page=1):
     #     path = '/authors/ajax-search/'
