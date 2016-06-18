@@ -16,27 +16,36 @@ class AudioKnigiServiceTest(unittest.TestCase):
 
         print(json.dumps(result, indent=4))
 
-    def test_get_author_books(self):
-        result = self.service.get_authors()
-
-        url = result['items'][0]['path']
-
-        result = self.service.get_books(url)
+    def test_get_best_books_by_week(self):
+        result = self.service.get_best_books(period='7')
 
         print(json.dumps(result, indent=4))
 
-        url = "http://audioknigi.club/author/Пратчетт%20Терри"
+    def test_get_best_books_by_month(self):
+        result = self.service.get_best_books(period='30')
 
-        result = self.service.get_books(url)
+        print(json.dumps(result, indent=4))
+
+    def test_get_best_books_by_all(self):
+        result = self.service.get_best_books(period='all')
+
+        print(json.dumps(result, indent=4))
+
+    def test_get_author_books(self):
+        result = self.service.get_authors()
+
+        path = result['items'][0]['path']
+
+        result = self.service.get_books(path)
 
         print(json.dumps(result, indent=4))
 
     def test_get_performer_books(self):
         result = self.service.get_performers()
 
-        url = result['items'][0]['path']
+        path = result['items'][0]['path']
 
-        result = self.service.get_books(url)
+        result = self.service.get_books(path)
 
         print(json.dumps(result, indent=4))
 
@@ -62,6 +71,8 @@ class AudioKnigiServiceTest(unittest.TestCase):
     def test_pagination(self):
         result = self.service.get_new_books(page=1)
 
+        print(json.dumps(result, indent=4))
+
         pagination = result['pagination']
 
         self.assertEqual(pagination['has_next'], True)
@@ -69,6 +80,8 @@ class AudioKnigiServiceTest(unittest.TestCase):
         self.assertEqual(pagination['page'], 1)
 
         result = self.service.get_new_books(page=2)
+
+        print(json.dumps(result, indent=4))
 
         pagination = result['pagination']
 
