@@ -182,17 +182,17 @@ class AudioKnigiService(HttpService):
             for track in tracks:
                 track['mp3'] = track['mp3'].encode('utf-8')
 
-                response = urllib.urlopen(track['mp3'])
-                size = response.headers.get("Content-Length")
+                # response = urllib.urlopen(track['mp3'])
+                # size = response.headers.get("Content-Length")
 
-                track['duration'] = int(float(size) / 1024.0 / 1024.0 * 2.5 * 60 * 1000)
+                # track['duration'] = int(float(size) / 1024.0 / 1024.0 * 2.5 * 60 * 1000)
 
                 # text = os.system('ffmpeg -i "' + track['mp3'] + '"')
                 #
                 # print text
 
                 # # Construct a reader from a file or filename.
-                # id3r = id3reader.Reader(urllib.urlopen(track['mp3']))
+                # id3r = id3reader.Reader(urllibin.urlopen(track['mp3']))
                 #
                 # # Ask the reader for ID3 values:
                 # print id3r.getValue('TLEN')
