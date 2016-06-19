@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import urllib
 import json
 from collections import OrderedDict
@@ -191,6 +190,24 @@ class AudioKnigiService(HttpService):
                 # text = os.system('ffmpeg -i "' + track['mp3'] + '"')
                 #
                 # print text
+
+                # # Construct a reader from a file or filename.
+                # id3r = id3reader.Reader(urllib.urlopen(track['mp3']))
+                #
+                # # Ask the reader for ID3 values:
+                # print id3r.getValue('TLEN')
+                #
+                # tlen = id3r.getValue('TLEN')
+                #
+                # if tlen:
+                #     Log('!!!!!!!!!!!!!!!!!!')
+                #     track['duration'] = float(tlen) / 60 / 1000
+                # else:
+                #     Log('?????????')
+                #     response = urllib.urlopen(track['mp3'])
+                #     size = response.headers.get("Content-Length")
+                #
+                #     track['duration'] = int(float(size) / 1024.0 / 1024.0 * 2.5 * 60 * 1000)
 
             return tracks
 
