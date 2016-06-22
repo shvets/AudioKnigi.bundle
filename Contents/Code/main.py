@@ -82,7 +82,7 @@ def HandleBestBooksByPeriod(title, period, page=1):
         description = item['description']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb, description=description),
+            key=Callback(HandleTracks, type='tracks', id=id, name=name, thumb=thumb, description=description),
             title=unicode(name),
             thumb=thumb
         ))
@@ -131,7 +131,7 @@ def HandleAuthorsLetterGroup(letter, page=1):
             url = item['path']
 
             oc.add(DirectoryObject(
-                key=Callback(HandleBooks, url=url, name=name),
+                key=Callback(HandleAuthor, type='author', url=url, name=name),
                 title=unicode(name)
             ))
 
@@ -140,7 +140,7 @@ def HandleAuthorsLetterGroup(letter, page=1):
         for group_name, group in authors.iteritems():
             if group_name.find(letter) == 0:
                 oc.add(DirectoryObject(
-                    key=Callback(HandleLetter, name=group_name, items=group),
+                    key=Callback(HandleAuthorsLetter, name=group_name, items=group),
                     title=group_name
                 ))
 
@@ -159,7 +159,7 @@ def HandlePerformersLetterGroup(letter, page=1):
             url = item['path']
 
             oc.add(DirectoryObject(
-                key=Callback(HandleBooks, url=url, name=name),
+                key=Callback(HandlePerformer, type='performer', url=url, name=name),
                 title=unicode(name)
             ))
 
@@ -168,34 +168,82 @@ def HandlePerformersLetterGroup(letter, page=1):
         for group_name, group in performers.iteritems():
             if group_name.find(letter) == 0:
                 oc.add(DirectoryObject(
-                    key=Callback(HandleLetter, name=group_name, items=group),
+                    key=Callback(HandlePerformersLetter, name=group_name, items=group),
                     title=group_name
                 ))
 
     return oc
 
-@route(PREFIX + '/letter', items=list)
-def HandleLetter(name, items):
+@route(PREFIX + '/authors_letter', items=list)
+def HandleAuthorsLetter(name, items):
     oc = ObjectContainer(title2=unicode(L(name)))
 
     for item in items:
         name = item['name']
-        path = item['path']
+        id = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleBooks, name=name, path=path),
+            key=Callback(HandleAuthor, type='author', name=name, id=id),
             title=unicode(name)
         ))
 
-    # pagination.append_controls(oc, response['pagination'], page=page, callback=HandleLetter, name=name)
+    return oc
+
+@route(PREFIX + '/performers_letter', items=list)
+def HandlePerformersLetter(name, items):
+    oc = ObjectContainer(title2=unicode(L(name)))
+
+    for item in items:
+        name = item['name']
+        id = item['path']
+
+        oc.add(DirectoryObject(
+            key=Callback(HandlePerformer, type='performer', name=name, id=id),
+            title=unicode(name)
+        ))
+
+    return oc
+
+@route(PREFIX + '/author')
+def HandleAuthor(operation=None, **params):
+    oc = ObjectContainer(title2=unicode(L(params['name'])))
+
+    media_info = MediaInfo(**params)
+
+    service.queue.handle_bookmark_operation(operation, media_info)
+
+    oc.add(DirectoryObject(
+        key=Callback(HandleBooks, **params),
+        title=unicode(params['name']),
+    ))
+
+    service.queue.append_bookmark_controls(oc, HandleAuthor, media_info)
+
+    return oc
+
+@route(PREFIX + '/performer')
+def HandlePerformer(operation=None, **params):
+    oc = ObjectContainer(title2=unicode(L(params['name'])))
+
+    media_info = MediaInfo(**params)
+
+    service.queue.handle_bookmark_operation(operation, media_info)
+
+    oc.add(DirectoryObject(
+        key=Callback(HandleBooks, **params),
+        title=unicode(params['name']),
+    ))
+
+    service.queue.append_bookmark_controls(oc, HandlePerformer, media_info)
 
     return oc
 
 @route(PREFIX + '/books')
-def HandleBooks(name, path, page=1):
-    oc = ObjectContainer(title2=unicode(L(name)))
+def HandleBooks(page=1, **params):
+    Log(params)
+    oc = ObjectContainer(title2=unicode(L(params['name'])))
 
-    response = service.get_books(path=path, page=page)
+    response = service.get_books(path=params['id'], page=page)
 
     for item in response['items']:
         name = item['name']
@@ -218,7 +266,7 @@ def HandleBooks(name, path, page=1):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=name, path=path)
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=params['name'], path=params['id'])
 
     return oc
 
@@ -233,7 +281,7 @@ def HandlePerformers(title, page=1):
         url = item['path']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleBooks, url=url, name=name),
+            key=Callback(HandlePerformer, url=url, name=name),
             title=unicode(name)
         ))
 
@@ -249,11 +297,11 @@ def HandleGenres(title, page=1):
 
     for item in response['items']:
         name = item['name']
-        path = item['path']
+        id = item['path']
         thumb = item['thumb']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleGenre, title=name, path=path),
+            key=Callback(HandleGenre, type='genre', name=name, id=id),
             title=unicode(name),
             thumb=thumb
         ))
@@ -263,10 +311,14 @@ def HandleGenres(title, page=1):
     return oc
 
 @route(PREFIX + '/genre')
-def HandleGenre(title, path, page=1):
-    oc = ObjectContainer(title2=unicode(L(title)))
+def HandleGenre(operation=None, page=1, **params):
+    oc = ObjectContainer(title2=unicode(L(params['name'])))
 
-    response = service.get_genre(path=path, page=page)
+    media_info = MediaInfo(**params)
+
+    service.queue.handle_bookmark_operation(operation, media_info)
+
+    response = service.get_genre(path=params['id'], page=page)
 
     for item in response['items']:
         name = item['name']
@@ -274,12 +326,14 @@ def HandleGenre(title, path, page=1):
         thumb = item['thumb']
 
         oc.add(DirectoryObject(
-            key=Callback(HandleTracks, id=id, name=name, thumb=thumb),
+            key=Callback(HandleTracks, type='tracks', id=id, name=name, thumb=thumb),
             title=unicode(name),
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenre, title=title, path=path)
+    service.queue.append_bookmark_controls(oc, HandleGenre, media_info)
+
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleGenre, name=params['name'], id=params['id'])
 
     return oc
 
@@ -377,9 +431,11 @@ def HandleContainer(**params):
     type = params['type']
 
     if type == 'author':
-        return HandleAuthorBooks(**params)
-    if type == 'performer':
-        return HandlePerformerBooks(**params)
+        return HandleAuthor(**params)
+    elif type == 'performer':
+        return HandlePerformer(**params)
+    elif type == 'genre':
+        return HandleGenre(**params)
     elif type == 'tracks':
         return HandleTracks(**params)
 
