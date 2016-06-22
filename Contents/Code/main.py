@@ -240,7 +240,6 @@ def HandlePerformer(operation=None, **params):
 
 @route(PREFIX + '/books')
 def HandleBooks(page=1, **params):
-    Log(params)
     oc = ObjectContainer(title2=unicode(L(params['name'])))
 
     response = service.get_books(path=params['id'], page=page)
