@@ -265,7 +265,7 @@ def HandleBooks(page=1, **params):
             thumb=thumb
         ))
 
-    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=params['name'], path=params['id'])
+    pagination.append_controls(oc, response['pagination'], page=page, callback=HandleBooks, name=params['name'], id=params['id'])
 
     return oc
 
@@ -354,7 +354,7 @@ def HandleTracks(operation=None, container=False, **params):
         format = 'mp3'
         bitrate = 0
         #duration = item['duration']
-        duration = 30 * 60 * 1000
+        # duration = 30 * 60 * 1000
         thumb = str(params['thumb'])
         artist = params['name']
 
@@ -365,8 +365,7 @@ def HandleTracks(operation=None, container=False, **params):
             'thumb': thumb,
             'artist': artist,
             'format': format,
-            'bitrate': bitrate,
-            'duration': duration
+            'bitrate': bitrate
         }
 
         oc.add(HandleTrack(**new_params))
@@ -395,9 +394,6 @@ def HandleTrack(container=False, **params):
     if 'bitrate' in media_info:
         metadata["bitrate"] = media_info['bitrate']
 
-    if 'duration' in media_info:
-        metadata["duration"] = media_info['duration']
-
     metadata_object = FlowBuilder.build_metadata_object(media_type=media_info['type'], title=media_info['name'])
 
     metadata_object.key = Callback(HandleTrack, container=True, **media_info)
@@ -405,9 +401,6 @@ def HandleTrack(container=False, **params):
     metadata_object.title = media_info['name']
     metadata_object.artist = media_info['name']
     metadata_object.thumb = media_info['thumb']
-
-    if 'duration' in media_info:
-        metadata_object.duration = int(media_info['duration'])
 
     if 'artist' in media_info:
         metadata_object.artist = media_info['artist']
