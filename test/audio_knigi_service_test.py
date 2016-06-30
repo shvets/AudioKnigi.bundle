@@ -134,6 +134,16 @@ class AudioKnigiServiceTest(unittest.TestCase):
 
         print(json.dumps(result, indent=4))
 
+    def test_grouping(self):
+        authors = None
+
+        with open("../Contents/authors.json", 'r') as file:
+            authors = json.load(file)
+
+        authors = self.service.group_items_by_letter(authors)
+
+        print(json.dumps(authors, indent=4))
+
     # def test_songdetails(self):
     #     #file = "/Users/alex/01_Vyzhit za bortom.mp3"
     #     #file = "/Users/alex/01.mp3"
