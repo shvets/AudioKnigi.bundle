@@ -108,7 +108,7 @@ class AudioKnigiService(HttpService):
         for item in items:
             link = item.find('a')
             name = item.find('h4/a').text
-            href = link.get('href')[len(self.URL):]
+            href = link.get('href')[len(self.URL)+1:]
             thumb = link.find('img').get('src')
 
             data.append({'name': name, 'path': href, 'thumb': thumb})

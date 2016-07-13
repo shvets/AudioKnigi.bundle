@@ -317,6 +317,8 @@ def HandleGenre(operation=None, page=1, **params):
 
     service.queue.handle_bookmark_operation(operation, media_info)
 
+    Log(params)
+
     response = service.get_genre(path=params['id'], page=page)
 
     for item in response['items']:
