@@ -129,10 +129,10 @@ class AudioKnigiServiceTest(unittest.TestCase):
     #
     #     print(json.dumps(result, indent=4))
 
-    def test_generate_authors_list(self):
-        result = self.service.generate_authors_list('authors.json')
-
-        print(json.dumps(result, indent=4))
+    # def test_generate_authors_list(self):
+    #     result = self.service.generate_authors_list('authors.json')
+    #
+    #     print(json.dumps(result, indent=4))
 
     def test_grouping(self):
         authors = None

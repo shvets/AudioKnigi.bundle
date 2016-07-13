@@ -86,7 +86,7 @@ class AudioKnigiService(HttpService):
         for item in items:
             link = item.find('h4/a')
             name = link.text
-            href = link.get('href')[len(self.URL):] + '/'
+            href = link.get('href')[len(self.URL)+1:] + '/'
 
             data.append({'name': name, 'path': href})
 
@@ -179,8 +179,12 @@ class AudioKnigiService(HttpService):
 
             tracks = self.to_json(self.http_request(new_url).read())
 
-            for track in tracks:
-                track['mp3'] = track['mp3'].encode('utf-8')
+            # for track in tracks:
+            #     print track['mp3']
+            #
+            #     track['mp3'] = track['mp3'].encode('utf-8')
+                #track['cat'] = track['cat'].encode('utf-8')
+
 
                 # response = urllib.urlopen(track['mp3'])
                 # size = response.headers.get("Content-Length")
