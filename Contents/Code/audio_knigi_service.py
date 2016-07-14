@@ -7,7 +7,7 @@ from collections import OrderedDict
 from http_service import HttpService
 
 class AudioKnigiService(HttpService):
-    URL = 'http://audioknigi.club'
+    URL = 'https://audioknigi.club'
 
     def available(self):
         return True
